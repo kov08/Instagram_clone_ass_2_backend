@@ -14,7 +14,7 @@ router.post("/signup", (req, res) => {
     const {name, userName, email, password}= req.body;
     // the above code means(for all): const name = req.body.name
     if (!name || !userName || !email || !password){
-        res.status(422).json({error:"Please add all the fields"})
+        return res.status(422).json({error:"Please add all the fields"})
     }
 
     USER.findOne({$or:[{email:email},{userName:userName}]})
@@ -32,7 +32,7 @@ router.post("/signup", (req, res) => {
             })
         
             user.save()
-            .then(user => { res.json({message:"Saved Successfully"})})
+            .then(user => { res.json({message:"Registered successfully, Let's login!"})})
             .catch(err => { console.log(err)})        
         })          
     })    
