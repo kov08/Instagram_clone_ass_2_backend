@@ -1,0 +1,10 @@
+const http = require('http');
+
+const server = http.createServer((req, res)=>{
+    console.log('Server Created');
+    res.end('Working with Nodemon (nodejs server!)')
+});
+
+server.listen(5000,"localhost", ()=>{
+    console.log("Server is running on 5000 (NODEMON)")
+})
