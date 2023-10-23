@@ -12,11 +12,10 @@ router.post("/signup", (req, res) => {
     // console.log(req.body.name)
     // res.json("Data posted successfully")
     const {name, userName, email, password}= req.body;
-    // the above code means(for all): const name = req.body.name
+    // the above code means: const name = req.body.name  (for all as well)
     if (!name || !userName || !email || !password){
         return res.status(422).json({error:"Please add all the fields"})
     }
-
     USER.findOne({$or:[{email:email},{userName:userName}]})
     .then((savedUser)=>{
         // console.log(savedUser)
@@ -25,17 +24,36 @@ router.post("/signup", (req, res) => {
         }
         bcrypt.hash(password, 12).then((hashedPassword)=>{
             const user = new USER({
-                name,
-                userName,
-                email,
-                password: hashedPassword
-            })
-        
+                name, userName, email, password: hashedPassword
+            })        
             user.save()
             .then(user => { res.json({message:"Registered successfully, Let's login!"})})
             .catch(err => { console.log(err)})        
         })          
     })    
+})
+
+router.post("/signin", (req,res) => {
+    const {email, password} = req.body;
+
+    if(!email || !password){
+        return res.status(422).json({error:"Please add email and password"})
+    }
+    USER.findOne({email:email}).then((savedUser) => {
+        if(!savedUser){
+            return res.status(422).json({error:"Invalid Email"})
+        }
+        // console.log(savedUser);
+        bcrypt.compare(password, savedUser.password)
+        .then((match)=> {
+            if(match){
+                return res.status(200).json({message: "Signed in Successfully "})                
+            }else{
+                return res.status(422).json({error:"Invalid Password"}) 
+            }
+        })
+        .catch(err => console.log(err))
+    })
 })
 
 module.exports = router
