@@ -7,9 +7,14 @@ const {mongoUrl} = require('./keys')
 
 app.use(cors())
 require("./models/model")
+require("./models/post")
+
 
 app.use(express.json())
 app.use(require("./routes/auth"))
+app.use(require("./routes/createPost"))
+
+
 mongoose.connect(mongoUrl)
 mongoose.connection.on("connected", ()=>{
     console.log("Successfully connected to mongoDB")
