@@ -11,9 +11,11 @@ router.get("/", (req, res) => {
     res.send("Hello")
 })
 
-router.get("/createPost", requireLogin ,(req, res) => {
-    console.log("helo Auth")
-})
+
+
+// router.get("/createPost", requireLogin ,(req, res) => {
+//     console.log("helo Auth")
+// })
 
 router.post("/signup", (req, res) => {
     // console.log(req.body.name)
