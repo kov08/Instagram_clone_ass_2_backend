@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const requireLogin = require("../middleware/requireLogin");
 const POST = mongoose.model("POST")
+const requireLogin = require("../middleware/requireLogin");
 
-// Route
+// Route for all posts on the feed
 router.get("/allposts", requireLogin, (rew, res) => {
     POST.find()
     .populate("postedBy","_id name")
@@ -37,6 +37,7 @@ router.post("/createPost", requireLogin, (req, res) => {
 router.get("/myposts",requireLogin, (req, res)=>{
     POST.find({postedBy: req.user._id})
         .populate("postedBy","_id name")
+        .populate("comments.postedBy","_id name")
         .then(myposts => {
             res.json(myposts)
     })
@@ -57,7 +58,6 @@ router.put("/like", requireLogin, (req, res)=>{
         }
     })
 })
-
 
 // Route to store userid for image unlike
 router.put("/unlike", requireLogin, (req, res)=>{
@@ -95,4 +95,25 @@ router.put("/comment", requireLogin, (req,res)=>{
         }
     })
 })
+
+// API to delete post
+router.delete("/deletePost/:postId", requireLogin, (req, res)=>{
+    POST.findOne({_id: req.params.postId})
+    .populate("postedBy","_id")
+    .exec((err, post) =>{
+        if (err || !post) {
+            return res.status(422).json({error:err})
+        }
+        // console.log(post.postedBy._id.toString(), req.user._id.toString())
+        if(post.postedBy._id.toString() === req.user._id.toString()){
+            post.remove()
+            .then(result=>{
+                return res.json({message:"Successfully Deleted"})
+            }).catch((err)=>{
+                console.log(err)
+            })
+        }
+    })
+ })
+
 module.exports = router
