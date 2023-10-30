@@ -8,6 +8,7 @@ const POST = mongoose.model("POST")
 router.get("/allposts", requireLogin, (rew, res) => {
     POST.find()
     .populate("postedBy","_id name")
+    .populate("comments.postedBy","_id name")
         .then(posts => res.json(posts))
         .catch(err => console.log("allposts route err: ",err))
 })
@@ -73,17 +74,19 @@ router.put("/unlike", requireLogin, (req, res)=>{
     })
 })
 
-
-router.put("./comment", requireLogin, (req,res)=>{
+// Modify Comment 
+router.put("/comment", requireLogin, (req,res)=>{
     const comment = {
         comment: req.body.text,
-        postedBy: req.body._id
+        postedBy: req.user._id
     }
     POST.findByIdAndUpdate(req.body.postId,{
         $push:{comments: comment }
     },{
         new: true
-    }).populate
+    })
+    .populate("comments.postedBy","_id name")
+    .populate("postedBy","_id name")
     .exec((err, result)=>{
         if(err){
             return res.status(422).json({error:err})
