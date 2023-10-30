@@ -5,10 +5,16 @@ const POST = mongoose.model("POST")
 const requireLogin = require("../middleware/requireLogin");
 
 // Route for all posts on the feed
-router.get("/allposts", requireLogin, (rew, res) => {
+router.get("/allposts", requireLogin, (req, res) => {
+    let limit = req.query.limit
+    let skip = req.query.skip
+    // console.log(limit)
     POST.find()
     .populate("postedBy","_id name")
     .populate("comments.postedBy","_id name")
+    .skip(parseInt(skip))
+    .limit(parseInt(limit))
+    // .sort("-createdAt")
         .then(posts => res.json(posts))
         .catch(err => console.log("allposts route err: ",err))
 })
@@ -41,7 +47,6 @@ router.get("/myposts",requireLogin, (req, res)=>{
         .then(myposts => {
             res.json(myposts)
     })
-
 })
 
 // Route to store userid for image like
@@ -50,7 +55,9 @@ router.put("/like", requireLogin, (req, res)=>{
         $push:{likes:req.user._id}
     },{
         new:true
-    }).exec((err, result)=>{
+    })
+    .populate("postedBy","_id name")
+    .exec((err, result)=>{
         if(err){
             return res.status(422).json({error:err})
         }else{
@@ -65,7 +72,9 @@ router.put("/unlike", requireLogin, (req, res)=>{
         $pull:{likes:req.user._id}
     },{
         new:true
-    }).exec((err, result)=>{
+    })
+    .populate("postedBy","_id name")
+    .exec((err, result)=>{
         if(err){
             return res.status(422).json({error:err})
         }else{
